@@ -1,2 +1,2 @@
-# yt-ad-vaporizer-filter
-buat filter iklan yt
+# Repo Gak jelas
+buat nyimpen aja
