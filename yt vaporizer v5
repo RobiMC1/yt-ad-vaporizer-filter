@@ -1,0 +1,113 @@
+! ===============================================================================
+! Title: yt vaporizer (Ultimate Bundled Master Edition)
+! Author / Repository: RobiMC1 / yt-ad-vaporizer-filter
+! Capability: Network Blocking + Response Pruning + Anti-Adblock Defuser + 
+!             Privacy & Tracking Uncloaking + Hidden Google/YT Endpoint Block +
+!             Procedural UI & Grid Repair
+! Target Engines: uBlock Origin 1.50+ / AdGuard 7.10+ / Compatible Blockers
+! ===============================================================================
+
+! -------------------------------------------------------------------------------
+! DIMENSI 1: PEMBLOKIRAN JARINGAN & HIDDEN ENDPOINTS (NETWORK BLOCKING)
+! Mematikan koneksi ke server iklan & endpoint pelacak tersembunyi Google/YouTube
+! -------------------------------------------------------------------------------
+! --- Domain Iklan Utam & Micro-Adservers ---
+||googleads.g.doubleclick.net^$domain=youtube.com
+||static.doubleclick.net^$domain=youtube.com
+||ad.doubleclick.net^$domain=youtube.com
+||googleadservices.com^$domain=youtube.com
+||googletagservices.com^$domain=youtube.com
+||pagead2.googlesyndication.com^$domain=youtube.com
+||adservice.google.com^$domain=youtube.com
+||youtube.com/pagead/*
+||youtube.com/ptracking$domain=youtube.com
+||youtube-nocookie.com/embed/*
+
+! --- Endpoint Telemetri, Analitik & Log Tersembunyi ---
+||google-analytics.com/analytics.js$domain=youtube.com
+||s.youtube.com^$domain=youtube.com
+||play.google.com/log*$domain=youtube.com
+||youtube.com/youtubei/v1/log_event*$domain=youtube.com
+||youtube.com/api/stats/ads
+||youtube.com/api/stats/atr
+||youtube.com/api/stats/watchtime*
+||youtube.com/api/stats/qoe$badfilter
+
+! -------------------------------------------------------------------------------
+! DIMENSI 2: MANIPULASI RESPONS SERVER & SCRIPTLET INJECTION (RESPONSE PRUNING)
+! Membersihkan array iklan langsung dari variabel JSON di memori peramban
+! -------------------------------------------------------------------------------
+youtube.com##+js(set, ytInitialPlayerResponse.adPlacements, undefined)
+youtube.com##+js(set, playerResponse.adPlacements, undefined)
+youtube.com##+js(set, ytInitialPlayerResponse.playerAds, undefined)
+youtube.com##+js(set, playerResponse.playerAds, undefined)
+youtube.com##+js(json-prune, adPlacements playerAds playerResponse.adPlacements)
+youtube.com##+js(json-prune, [].playerResponse.adPlacements)
+youtube.com##+js(nowebrtc)
+
+! -------------------------------------------------------------------------------
+! DIMENSI 3: BYPASS ANTI-ADBLOCK & SCRIPTLET DEFUSER
+! Menetralkan skrip pendeteksi adblocker dan mengelabui status pemutaran iklan
+! -------------------------------------------------------------------------------
+youtube.com##+js(set, google_ad_status, 1)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.allow_muted_autoplay, true)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.web_enable_ab_reg_app_errors, false)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.disable_async_script_ad_inject, true)
+youtube.com##+js(abort-on-property-write, ytInitialPlayerResponse.adPlacements)
+
+! -------------------------------------------------------------------------------
+! DIMENSI 4: PERLINDUNGAN PRIVASI, UNCLOAKING & PEMBERSIHAN URL TERSEMBUNYI
+! Menghapus parameter pelacak URL standar dan pelacak tersembunyi Google
+! -------------------------------------------------------------------------------
+$removeparam=utm_source,domain=youtube.com
+$removeparam=utm_medium,domain=youtube.com
+$removeparam=utm_campaign,domain=youtube.com
+$removeparam=si,domain=youtube.com
+$removeparam=fbclid,domain=youtube.com
+$removeparam=gclid,domain=youtube.com
+$removeparam=gbraid,domain=youtube.com
+$removeparam=wbraid,domain=youtube.com
+$removeparam=feature,domain=youtube.com
+
+! -------------------------------------------------------------------------------
+! DIMENSI 5A: BRUTE-FORCE CSS ELEMENT HIDING (LEGACY COMPATIBILITY - v1)
+! Menyembunyikan komponen iklan secara langsung di tingkat DOM (Cepat & Ringan)
+! -------------------------------------------------------------------------------
+youtube.com##.video-ads
+youtube.com##.ytp-ad-module
+youtube.com##.ytp-ad-overlay-container
+youtube.com##.ytp-ad-text-overlay
+youtube.com##.ytp-ad-image-overlay
+youtube.com##.ytp-ad-progress-bar-container
+youtube.com##.ytp-ad-button-container
+youtube.com##.ytp-ad-skip-button-slot
+youtube.com##ytd-promoted-sparkles-web-renderer
+youtube.com##ytd-promoted-sparkles-text-search-renderer
+youtube.com##ytd-display-ad-renderer
+youtube.com##ytd-statement-banner-renderer
+youtube.com##ytd-in-feed-ad-layout-renderer
+youtube.com##ytd-banner-promo-renderer
+youtube.com##ytd-ad-slot-renderer
+youtube.com##ytd-action-companion-ad-renderer
+youtube.com##ytd-clarification-renderer
+youtube.com##ytd-compact-promoted-item-renderer
+youtube.com##ytd-companion-slot-renderer
+youtube.com##ytd-search-pyv-ad-renderer
+youtube.com##ytd-merch-shelf-renderer
+youtube.com##ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]
+youtube.com##ytd-ad-engagement-panel-title-header-renderer
+youtube.com##div#player-ads
+youtube.com##div#mashead-ad
+youtube.com##div#offer-module
+youtube.com##div#sparkles-container
+youtube.com##aside#ad-slot
+
+! -------------------------------------------------------------------------------
+! DIMENSI 5B: OPTIMASI ANTARMUKA & PROCEDURAL CONTAINER REPAIR (LAYOUT FIX - v2)
+! Menutup ruang kosong (whitespace) dan mengatur ulang struktur grid YouTube
+! -------------------------------------------------------------------------------
+youtube.com##ytd-rich-grid-row:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-ad-slot-renderer):style(display: none !important;)
+youtube.com##ytd-rich-section-renderer:has(ytd-statement-banner-renderer):style(display: none !important;)
+youtube.com##ytd-rich-section-renderer:has(ytd-in-feed-ad-layout-renderer):style(display: none !important;)
