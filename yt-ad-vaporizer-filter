@@ -18,7 +18,7 @@
 
 ! --------------------------------------------------------------------
 ! 2. ROOT DOM & AD NODE EVICTION / COSMETIC FILTERING (LAYER 2)
-! Menghapus/menyembunyikan elemen struktur iklan dari antarmuka YouTube
+! Menghapus/menyembunyikan elemen struktur iklan dari antarmuka YouTube.
 ! --------------------------------------------------------------------
 youtube.com,youtube-nocookie.com##ytd-ad-slot-renderer
 youtube.com,youtube-nocookie.com##ytd-in-feed-ad-layout-renderer
