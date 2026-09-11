@@ -1,0 +1,56 @@
+! ===============================================================================
+! Title: yt vaporizer v2 (Hybrid Ultra-Compatible Edition)
+! Description: Combined Brute-Force (v1) & Container Cleanup (v2) for Maximum Compatibility
+! Target: All Devices (Legacy & Modern / Low-end & High-end)
+! ===============================================================================
+
+! --- 1. NETWORK & SCRIPT BLOCKING (Universal Fast Execution) ---
+||googleads.g.doubleclick.net^$domain=youtube.com
+||static.doubleclick.net^$domain=youtube.com
+||youtube.com/pagead/*
+||youtube.com/ptracking$domain=youtube.com
+||youtube-nocookie.com/embed/*
+
+! --- 2. BRUTE-FORCE CSS ELEMENT HIDING (Style v1: Direct DOM Match) ---
+! Elemen Iklan Video, Banner, Pop-up, dan Shelf Sponsor
+youtube.com##.video-ads
+youtube.com##.ytp-ad-module
+youtube.com##.ytp-ad-overlay-container
+youtube.com##.ytp-ad-text-overlay
+youtube.com##.ytp-ad-image-overlay
+youtube.com##.ytp-ad-progress-bar-container
+youtube.com##.ytp-ad-button-container
+youtube.com##.ytp-ad-skip-button-slot
+youtube.com##ytd-promoted-sparkles-web-renderer
+youtube.com##ytd-promoted-sparkles-text-search-renderer
+youtube.com##ytd-display-ad-renderer
+youtube.com##ytd-statement-banner-renderer
+youtube.com##ytd-in-feed-ad-layout-renderer
+youtube.com##ytd-banner-promo-renderer
+youtube.com##ytd-ad-slot-renderer
+youtube.com##ytd-action-companion-ad-renderer
+youtube.com##ytd-clarification-renderer
+youtube.com##ytd-compact-promoted-item-renderer
+youtube.com##ytd-companion-slot-renderer
+youtube.com##ytd-rich-item-renderer:has(#form-banner)
+youtube.com##ytd-search-pyv-ad-renderer
+youtube.com##ytd-merch-shelf-renderer
+youtube.com##ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]
+youtube.com##ytd-ad-engagement-panel-title-header-renderer
+youtube.com##div#player-ads
+youtube.com##div#mashead-ad
+youtube.com##div#offer-module
+youtube.com##div#sparkles-container
+youtube.com##aside#ad-slot
+
+! --- 3. CONTAINER CLEANUP & LAYOUT REPAIR (Style v2: Grid Fix) ---
+! Mengatur ulang grid YouTube agar tidak meninggalkan kotak kosong bekas iklan
+youtube.com##ytd-rich-grid-row:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-ad-slot-renderer):style(display: none !important;)
+
+! --- 4. SCRIPTLET & PROCEDURAL BYPASS (Modern Engines Only / Safe Fallback) ---
+! Scriptlet ini akan diabaikan oleh adblocker lama secara aman tanpa bikin error
+youtube.com##+js(set, ytInitialPlayerResponse.adPlacements, undefined)
+youtube.com##+js(set, playerResponse.adPlacements, undefined)
+youtube.com##+js(json-prune, adPlacements playerAds)
