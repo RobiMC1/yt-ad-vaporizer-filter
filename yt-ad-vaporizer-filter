@@ -1,0 +1,38 @@
+! ====================================================================
+! Title: YouTube Pre-Download Ad Vaporizer (Converted from Stealth Shield V7.1)
+! Description: Declarative network blocking, cosmetic DOM purging, and stealth UI rules.
+! Homepage: https://github.com/USERNAME_ANDA/NAMA_REPOSITORI
+! Version: 7.1.0-filter
+! Expires: 2 days
+! ====================================================================
+
+! --------------------------------------------------------------------
+! 1. NETWORK STREAM & ASSET BLOCKING (LAYER 1)
+! Mencegat & memblokir URL tracker, iklan, dan stream iklan sebelum terunduh
+! --------------------------------------------------------------------
+||doubleclick.net^$domain=youtube.com|youtube-nocookie.com
+||googleadservices.com^$domain=youtube.com|youtube-nocookie.com
+||youtube.com/pagead/*
+||youtube.com/ptracking*
+||googlevideo.com/*&ctier=L$domain=youtube.com|youtube-nocookie.com
+
+! --------------------------------------------------------------------
+! 2. ROOT DOM & AD NODE EVICTION / COSMETIC FILTERING (LAYER 2)
+! Menghapus/menyembunyikan elemen struktur iklan dari antarmuka YouTube
+! --------------------------------------------------------------------
+youtube.com,youtube-nocookie.com##ytd-ad-slot-renderer
+youtube.com,youtube-nocookie.com##ytd-in-feed-ad-layout-renderer
+youtube.com,youtube-nocookie.com##ytd-banner-promo-renderer
+youtube.com,youtube-nocookie.com##ytd-statement-banner-renderer
+youtube.com,youtube-nocookie.com##.ytp-ad-overlay-container
+youtube.com,youtube-nocookie.com##.ytp-ad-message-container
+youtube.com,youtube-nocookie.com###player-ads
+youtube.com,youtube-nocookie.com##ytd-display-ad-renderer
+youtube.com,youtube-nocookie.com##ytd-promoted-sparkles-web-renderer
+
+! --------------------------------------------------------------------
+! 3. VISUAL STEALTH SHIELD & OVERLAY SUPPRESSION (LAYER 0)
+! Menyembunyikan elemen visual pemutar saat kondisi iklan aktif
+! --------------------------------------------------------------------
+youtube.com,youtube-nocookie.com##.ad-showing video, .ad-interrupting video:style(opacity: 0 !important; filter: brightness(0) !important;)
+youtube.com,youtube-nocookie.com##.ytp-ad-player-overlay
