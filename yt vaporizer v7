@@ -1,0 +1,56 @@
+! ===============================================================================
+! Title: yt vaporizer (Illusionary Master Architecture)
+! Author / Repository: RobiMC1 / TechForge Elite
+! Capability: Dynamic Ad Mocking + Scriptlet Defuser + Illusionary State Masking +
+!             Procedural Layout Repair + Tracker Interception
+! Target Engines: uBlock Origin 1.50+ / AdGuard 7.10+
+! ===============================================================================
+
+! -------------------------------------------------------------------------------
+! DIMENSI 1: AD MOCKING & STATUS ILUSI (Memberikan Respon Palsu "Iklan Sukses")
+! -------------------------------------------------------------------------------
+youtube.com##+js(set, google_ad_status, 1)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.allow_muted_autoplay, true)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.web_enable_ab_reg_app_errors, false)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.disable_async_script_ad_inject, true)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.enable_client_sli_for_vod, false)
+
+! -------------------------------------------------------------------------------
+! DIMENSI 2: REDIREKSI ENDPOINT TELEMETRI (Mencegah Error Network di Logs Server)
+! -------------------------------------------------------------------------------
+youtube.com##+js(set, ytInitialPlayerResponse.adPlacements, [])
+youtube.com##+js(set, playerResponse.adPlacements, [])
+youtube.com##+js(nowebrtc)
+
+! -------------------------------------------------------------------------------
+! DIMENSI 3: PERLINDUNGAN PRIVASI & PEMBERSIHAN URL
+! -------------------------------------------------------------------------------
+$removeparam=utm_source,domain=youtube.com
+$removeparam=utm_medium,domain=youtube.com
+$removeparam=utm_campaign,domain=youtube.com
+$removeparam=si,domain=youtube.com
+$removeparam=fbclid,domain=youtube.com
+$removeparam=gclid,domain=youtube.com
+$removeparam=gbraid,domain=youtube.com
+$removeparam=wbraid,domain=youtube.com
+
+! -------------------------------------------------------------------------------
+! DIMENSI 4: ISOLASI VISUAL & GRID REPAIR (Kosmetik Luar Meja)
+! -------------------------------------------------------------------------------
+youtube.com##.video-ads:style(display: none !important; opacity: 0 !important; visibility: hidden !important;)
+youtube.com##.ytp-ad-module:style(display: none !important;)
+youtube.com##.ytp-ad-overlay-container:style(display: none !important;)
+youtube.com##ytd-promoted-sparkles-web-renderer
+youtube.com##ytd-display-ad-renderer
+youtube.com##ytd-statement-banner-renderer
+youtube.com##ytd-in-feed-ad-layout-renderer
+youtube.com##ytd-banner-promo-renderer
+youtube.com##ytd-ad-slot-renderer
+youtube.com##div#player-ads
+youtube.com##div#mashead-ad
+youtube.com##div#offer-module
+youtube.com##aside#ad-slot
+youtube.com##ytd-rich-grid-row:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-ad-slot-renderer):style(display: none !important;)
+youtube.com##ytd-rich-section-renderer:has(ytd-statement-banner-renderer):style(display: none !important;)
