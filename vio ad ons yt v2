@@ -1,0 +1,168 @@
+// ==UserScript==
+// @name         YouTube Ad Vaporizer (Illusionary Stealth Engine V8.0)
+// @namespace    https://techforge.elite/yt-ad-vaporizer-v8
+// @version      8.0.0-Illusion
+// @description  Mengelabui sistem telemetri YouTube agar menganggap iklan sukses diputar sempurna, sementara iklan dihancurkan di latar belakang.
+// @author       TechForge Elite & RobiMC1
+// @match        *://*.youtube.com/*
+// @match        *://*.youtube-nocookie.com/*
+// @grant        none
+// @run-at       document-start
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // 0. VISUAL ISOLATION LAYER (Gunakan CSS Hiding Lapis Tinggi)
+    const style = document.createElement('style');
+    style.textContent = `
+        .ad-showing video, 
+        .ad-interrupting video {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        .ytp-ad-player-overlay,
+        .ytp-ad-image-overlay,
+        .ytp-ad-overlay-container {
+            display: none !important;
+            visibility: hidden !important;
+        }
+    `;
+    (document.head || document.documentElement).appendChild(style);
+
+    // 1. LAYER 0: PAYLOAD MOCKING (Memberikan Objek Dummy yang Valid)
+    function mockAdPayload(data) {
+        if (!data || typeof data !== 'object') return data;
+
+        // Kosongkan array adPlacements tetapi pertahankan struktur objek agar tidak pemicu Uncaught TypeError
+        if (data.adPlacements) {
+            data.adPlacements = [];
+        }
+        if (data.playerAds) {
+            data.playerAds = [];
+        }
+        if (data.adSlots) {
+            data.adSlots = [];
+        }
+
+        if (data.playerResponse) {
+            if (data.playerResponse.adPlacements) data.playerResponse.adPlacements = [];
+            if (data.playerResponse.playerAds) data.playerResponse.playerAds = [];
+        }
+
+        return data;
+    }
+
+    // Hijack JSON.parse untuk menyuntikkan Payload Dummy
+    const nativeJSONParse = JSON.parse;
+    JSON.parse = function (text, reviver) {
+        const obj = nativeJSONParse.apply(this, arguments);
+        if (obj && typeof obj === 'object') {
+            if (obj.adPlacements || obj.playerAds || obj.playerResponse) {
+                return mockAdPayload(obj);
+            }
+        }
+        return obj;
+    };
+
+    // Hijack Property Global
+    let rawInitialResponse = window.ytInitialPlayerResponse;
+    Object.defineProperty(window, 'ytInitialPlayerResponse', {
+        get: () => rawInitialResponse,
+        set: (val) => {
+            rawInitialResponse = mockAdPayload(val);
+        },
+        configurable: true
+    });
+
+    // 2. LAYER 1: MOCKING TELEMETRI & RESPONSE INTERCEPTION
+    const nativeFetch = window.fetch;
+    window.fetch = async function (...args) {
+        const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+
+        // Peringatan Telemetri Iklan: Jawab dengan HTTP 200 OK + Payload Kosong (Agar server tidak mencatat Network Failure)
+        if (
+            url.includes('/api/stats/ads') ||
+            url.includes('/pagead/') ||
+            url.includes('/ptracking') ||
+            url.includes('googleadservices.com')
+        ) {
+            return new Response(JSON.stringify({ status: 'ok', mocked: true }), {
+                status: 200,
+                statusText: 'OK',
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        if (url.includes('/youtubei/v1/player') || url.includes('/youtubei/v1/next')) {
+            const response = await nativeFetch.apply(this, args);
+            const clone = response.clone();
+            try {
+                const data = await clone.json();
+                return new Response(JSON.stringify(mockAdPayload(data)), {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers
+                });
+            } catch (e) {
+                return response;
+            }
+        }
+
+        return nativeFetch.apply(this, args);
+    };
+
+    // 3. LAYER 2: FAST-FORWARD AD SIMULATION (Pemutaran Iklan Kilat 100x & Muted)
+    function handleAdPlaybackIllusion() {
+        const player = document.querySelector('#movie_player') || document.querySelector('.html5-video-player');
+        const video = document.querySelector('video');
+
+        if (!video || !player) return;
+
+        const isAdShowing = player.classList.contains('ad-showing') ||
+                            player.classList.contains('ad-interrupting') ||
+                            !!document.querySelector('.ytp-ad-player-overlay');
+
+        if (isAdShowing) {
+            // Sembunyikan suara dan percepat pemutaran hingga batas maksimum peramban
+            video.muted = true;
+            video.playbackRate = 16.0; // Maksimum playbackRate HTML5 standar tanpa pemicu crash
+
+            // Lompat langsung ke akhir durasi iklan
+            if (isFinite(video.duration) && video.duration > 0) {
+                video.currentTime = video.duration - 0.01;
+            }
+
+            // Trigger tombol skip otomatis jika tersedia
+            const skipBtn = player.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');
+            if (skipBtn) {
+                skipBtn.removeAttribute('disabled');
+                skipBtn.click();
+            }
+        }
+    }
+
+    // 4. LAYER 3: REAL-TIME EXECUTION LOOP
+    const observer = new MutationObserver(() => {
+        handleAdPlaybackIllusion();
+    });
+
+    function init() {
+        handleAdPlaybackIllusion();
+
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'src']
+        });
+
+        setInterval(handleAdPlaybackIllusion, 10);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
