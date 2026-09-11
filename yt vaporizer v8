@@ -1,0 +1,48 @@
+! ===============================================================================
+! Title: yt vaporizer (Synchronized Master Architecture V8.2)
+! Author / Repository: RobiMC1 / TechForge Elite
+! Description: State-Synchronized Ad Blocking Ruleset to Prevent Blackout & Race Conditions
+! Engine Target: uBlock Origin 1.50+ / AdGuard 7.10+
+! ===============================================================================
+
+! -------------------------------------------------------------------------------
+! STAGE 1 & 2: MEMORI & STATUS MOCKING (Harus Dieksekusi Paling Awal)
+! -------------------------------------------------------------------------------
+youtube.com##+js(set, google_ad_status, 1)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.allow_muted_autoplay, true)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.web_enable_ab_reg_app_errors, false)
+youtube.com##+js(set, yt.config_.EXPERIMENT_FLAGS.disable_async_script_ad_inject, true)
+youtube.com##+js(set, ytInitialPlayerResponse.adPlacements, [])
+youtube.com##+js(set, playerResponse.adPlacements, [])
+youtube.com##+js(nowebrtc)
+
+! -------------------------------------------------------------------------------
+! STAGE 3: PRIVASI & STRIPPING PARAMETER URL
+! -------------------------------------------------------------------------------
+$removeparam=utm_source,domain=youtube.com
+$removeparam=utm_medium,domain=youtube.com
+$removeparam=utm_campaign,domain=youtube.com
+$removeparam=si,domain=youtube.com
+$removeparam=fbclid,domain=youtube.com
+$removeparam=gclid,domain=youtube.com
+
+! -------------------------------------------------------------------------------
+! STAGE 4: ISOLASI VISUAL HALUS (Mencegah Layar Hitam & Rusaknya Canvas Player)
+! Catatan: Hindari 'display: none' pada .video-ads agar tidak merusak viewport player
+! -------------------------------------------------------------------------------
+youtube.com##.ytp-ad-module:style(visibility: hidden !important; pointer-events: none !important;)
+youtube.com##.ytp-ad-overlay-container:style(visibility: hidden !important; pointer-events: none !important;)
+youtube.com##ytd-promoted-sparkles-web-renderer
+youtube.com##ytd-display-ad-renderer
+youtube.com##ytd-statement-banner-renderer
+youtube.com##ytd-in-feed-ad-layout-renderer
+youtube.com##ytd-banner-promo-renderer
+youtube.com##ytd-ad-slot-renderer
+youtube.com##div#player-ads
+youtube.com##div#mashead-ad
+youtube.com##div#offer-module
+youtube.com##aside#ad-slot
+youtube.com##ytd-rich-grid-row:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-display-ad-renderer):style(display: none !important;)
+youtube.com##ytd-rich-item-renderer:has(ytd-ad-slot-renderer):style(display: none !important;)
+youtube.com##ytd-rich-section-renderer:has(ytd-statement-banner-renderer):style(display: none !important;)
