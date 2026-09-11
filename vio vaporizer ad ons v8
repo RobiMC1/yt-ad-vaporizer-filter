@@ -1,0 +1,168 @@
+// ==UserScript==
+// @name         YouTube Ad Vaporizer (Synchronized Engine V8.2)
+// @namespace    https://techforge.elite/yt-ad-vaporizer-v8.2
+// @version      8.2.0-Synchronized
+// @description  Manipulasi iklan terurut berdasarkan ReadyState media untuk menghilangkan blank hitam & race condition.
+// @author       TechForge Elite & RobiMC1
+// @match        *://*.youtube.com/*
+// @match        *://*.youtube-nocookie.com/*
+// @grant        none
+// @run-at       document-start
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // State Flag untuk Mencegah Race Condition (Eksekusi Berulang)
+    let isProcessingAd = false;
+
+    // 0. VISUAL ISOLATION (Gunakan Opacity/Visibility Saja Agar Player Tidak Freeze)
+    const style = document.createElement('style');
+    style.textContent = `
+        .ad-showing video, 
+        .ad-interrupting video {
+            visibility: hidden !important;
+        }
+        .ytp-ad-player-overlay,
+        .ytp-ad-image-overlay,
+        .ytp-ad-overlay-container {
+            display: none !important;
+        }
+    `;
+    (document.head || document.documentElement).appendChild(style);
+
+    // 1. STAGE 1 & 2: PAYLOAD MOCKING (Intersepsi Sebelum Data Dibaca Player)
+    function sanitizePayload(data) {
+        if (!data || typeof data !== 'object') return data;
+        if (data.adPlacements) data.adPlacements = [];
+        if (data.playerAds) data.playerAds = [];
+        if (data.adSlots) data.adSlots = [];
+        if (data.playerResponse) {
+            if (data.playerResponse.adPlacements) data.playerResponse.adPlacements = [];
+            if (data.playerResponse.playerAds) data.playerResponse.playerAds = [];
+        }
+        return data;
+    }
+
+    const nativeJSONParse = JSON.parse;
+    JSON.parse = function (text, reviver) {
+        const obj = nativeJSONParse.apply(this, arguments);
+        if (obj && typeof obj === 'object') {
+            if (obj.adPlacements || obj.playerAds || obj.playerResponse) {
+                return sanitizePayload(obj);
+            }
+        }
+        return obj;
+    };
+
+    let rawResponse = window.ytInitialPlayerResponse;
+    Object.defineProperty(window, 'ytInitialPlayerResponse', {
+        get: () => rawResponse,
+        set: (val) => { rawResponse = sanitizePayload(val); },
+        configurable: true
+    });
+
+    // 2. NETWORK TELEMETRY MOCKING (HTTP 200 OK Fake Responses)
+    const nativeFetch = window.fetch;
+    window.fetch = async function (...args) {
+        const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+
+        if (
+            url.includes('/api/stats/ads') ||
+            url.includes('/pagead/') ||
+            url.includes('/ptracking') ||
+            url.includes('googleadservices.com')
+        ) {
+            return new Response(JSON.stringify({ status: 'ok', mocked: true }), {
+                status: 200,
+                statusText: 'OK',
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        if (url.includes('/youtubei/v1/player') || url.includes('/youtubei/v1/next')) {
+            const response = await nativeFetch.apply(this, args);
+            const clone = response.clone();
+            try {
+                const data = await clone.json();
+                return new Response(JSON.stringify(sanitizePayload(data)), {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers
+                });
+            } catch (e) {
+                return response;
+            }
+        }
+
+        return nativeFetch.apply(this, args);
+    };
+
+    // 3. STAGE 3 & 4: SYNCHRONIZED MEDIA EXECUTION (Pencegah Blank Hitam)
+    function executeSynchronizedAdSkip() {
+        const player = document.querySelector('#movie_player') || document.querySelector('.html5-video-player');
+        const video = document.querySelector('video');
+
+        if (!video || !player) return;
+
+        const isAdShowing = player.classList.contains('ad-showing') ||
+                            player.classList.contains('ad-interrupting') ||
+                            !!document.querySelector('.ytp-ad-player-overlay');
+
+        if (isAdShowing) {
+            // Mute secara instan agar tidak terjadi kebocoran suara
+            video.muted = true;
+
+            // KUNCI UTAMA: Hanya manipulasi posisi video JIKA metadata media SUDAH SIAP (readyState >= 2)
+            // Ini mencegah efek layar hitam / blackout spinner!
+            if (video.readyState >= 2) {
+                if (!isProcessingAd) {
+                    isProcessingAd = true;
+
+                    // Naikkan playbackRate ke tingkat aman tertinggi
+                    video.playbackRate = 16.0;
+
+                    // Geser waktu tonton secara terukur (bukan lompat ekstrem saat unbuffered)
+                    if (isFinite(video.duration) && video.duration > 0) {
+                        video.currentTime = video.duration - 0.05;
+                    }
+
+                    // Tekan tombol skip secara otomatis jika dirender oleh player
+                    const skipBtn = player.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');
+                    if (skipBtn) {
+                        skipBtn.removeAttribute('disabled');
+                        skipBtn.click();
+                    }
+
+                    setTimeout(() => { isProcessingAd = false; }, 100);
+                }
+            }
+        } else {
+            isProcessingAd = false;
+        }
+    }
+
+    // 4. STAGE 5: OBSERVER DENGAN DEBOUNCE (Mencegah Loop Berlebihan)
+    let executionTimer = null;
+    const observer = new MutationObserver(() => {
+        if (executionTimer) clearTimeout(executionTimer);
+        executionTimer = setTimeout(executeSynchronizedAdSkip, 5);
+    });
+
+    function init() {
+        executeSynchronizedAdSkip();
+
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'src']
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
