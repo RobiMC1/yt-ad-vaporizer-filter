@@ -1,0 +1,50 @@
+! ====================================================================
+! Title: YouTube Vaporizer Ultra (Ad-Block + Anti-Telemetry + Declutter)
+! Description: Gabungan Pemblokir Iklan Agresif Vaporizer & Anti-Pelacak yt-neuter
+! Version: 8.0.0-hybrid
+! Expires: 2 days
+! ====================================================================
+
+! --------------------------------------------------------------------
+! 1. VAPORIZER LAYER: NETWORK AD BLOCKING (Memutus Stream Iklan)
+! --------------------------------------------------------------------
+||doubleclick.net^$domain=youtube.com|youtube-nocookie.com
+||googleadservices.com^$domain=youtube.com|youtube-nocookie.com
+||youtube.com/pagead/*$domain=youtube.com|youtube-nocookie.com
+||youtube.com/ptracking*$domain=youtube.com|youtube-nocookie.com
+||googlevideo.com/*&ctier=L$domain=youtube.com|youtube-nocookie.com
+
+! --------------------------------------------------------------------
+! 2. YT-NEUTER LAYER: ANTI-TELEMETRY & TRACKER BLOCKING (Privasi & Anti-Deteksi)
+! --------------------------------------------------------------------
+||youtube.com/youtubei/v1/log_event*$domain=youtube.com|youtube-nocookie.com
+||youtube.com/api/stats/watchtime*$domain=youtube.com|youtube-nocookie.com
+||youtube.com/api/stats/playback*$domain=youtube.com|youtube-nocookie.com
+||youtube.com/api/stats/qoe*$domain=youtube.com|youtube-nocookie.com
+||google-analytics.com^$domain=youtube.com|youtube-nocookie.com
+||googletagmanager.com^$domain=youtube.com|youtube-nocookie.com
+
+! --------------------------------------------------------------------
+! 3. VAPORIZER & YT-NEUTER: COSMETIC DOM PURGING (Penghapusan Elemen UI)
+! --------------------------------------------------------------------
+! Slot Iklan & Banner Promosi
+youtube.com,youtube-nocookie.com##ytd-ad-slot-renderer
+youtube.com,youtube-nocookie.com##ytd-in-feed-ad-layout-renderer
+youtube.com,youtube-nocookie.com##ytd-banner-promo-renderer
+youtube.com,youtube-nocookie.com##ytd-statement-banner-renderer
+youtube.com,youtube-nocookie.com##.ytp-ad-overlay-container
+youtube.com,youtube-nocookie.com##.ytp-ad-message-container
+youtube.com,youtube-nocookie.com###player-ads
+youtube.com,youtube-nocookie.com##ytd-display-ad-renderer
+youtube.com,youtube-nocookie.com##ytd-promoted-sparkles-web-renderer
+
+! Distrasi & Promo YouTube Premium (Decluttering)
+youtube.com,youtube-nocookie.com##ytd-rich-shelf-renderer[is-shorts]
+youtube.com,youtube-nocookie.com##ytd-mealbar-promo-renderer
+youtube.com,youtube-nocookie.com##ytd-merch-shelf-renderer
+
+! --------------------------------------------------------------------
+! 4. STEALTH SHIELD: VISUAL OVERLAY SUPPRESSION
+! --------------------------------------------------------------------
+youtube.com,youtube-nocookie.com##.ad-showing video, .ad-interrupting video:style(opacity: 0 !important; filter: brightness(0) !important;)
+youtube.com,youtube-nocookie.com##.ytp-ad-player-overlay
