@@ -1,0 +1,35 @@
+! =========================================================================
+! TITLE: TechForge Elite Ultimate - Unified YouTube Ad-Vaporizer Blocklist
+! DESCRIPTION: Kombinasi total Zero-Latency CSS, Scriptlets, & Network Rules
+! =========================================================================
+
+! -------------------------------------------------------------------------
+! 1. NETWORK & API FILTERING (Redirect & Block Tracking/Ads)
+! -------------------------------------------------------------------------
+||youtube.com/api/stats/ads$xhr,domain=youtube.com|m.youtube.com
+||youtube.com/pagead/*$domain=youtube.com|m.youtube.com
+||googleadservices.com/*$domain=youtube.com|m.youtube.com
+||googlesyndication.com/*$domain=youtube.com|m.youtube.com
+
+! -------------------------------------------------------------------------
+! 2. COSMETIC FILTERING (Zero-Latency Visual Blunter)
+! -------------------------------------------------------------------------
+youtube.com,m.youtube.com##ytm-companion-slot, ytm-companion-ad-renderer, .video-ads, .ytp-ad-module, .ytp-ad-player-overlay, .ytp-ad-badge--clean-player, ytm-promoted-sparkles-web-renderer, ytm-statement-banner-renderer, ytd-action-companion-ad-renderer, ytd-display-ad-renderer, ytd-ad-slot-renderer, ytd-in-feed-ad-layout-renderer, #player-ads, #masthead-ad, #offer-module, aside#ad-slot, .ytp-ad-overlay-slot, .ytp-ad-skip-button-container
+
+! Sembunyikan baris grid/feed yang memuat iklan sponsor/display
+youtube.com,m.youtube.com##ytd-rich-grid-row:has(ytd-display-ad-renderer), ytd-rich-item-renderer:has(ytd-display-ad-renderer), ytd-rich-item-renderer:has(ytd-ad-slot-renderer), ytd-rich-section-renderer:has(ytd-statement-banner-renderer)
+
+! Sembunyikan kontainer video saat status iklan aktif (.ad-showing / .ad-interrupting)
+youtube.com,m.youtube.com##.ad-showing video, .ad-interrupting video
+
+! -------------------------------------------------------------------------
+! 3. ADVANCED SCRIPTLETS & PROPERTY LOCKDOWN (Injeksi Runtime)
+! Menggantikan logika intersep JSON & Player State dari UserScript
+! -------------------------------------------------------------------------
+! Hapus properti iklan dari objek pemutar YouTube secara instan via set-constant/prevent-eval
+m.youtube.com,youtube.com##+js(set, ytInitialPlayerResponse.adPlacements, undefined)
+m.youtube.com,youtube.com##+js(set, ytInitialPlayerResponse.playerAds, undefined)
+m.youtube.com,youtube.com##+js(set, ytInitialPlayerResponse.adSlots, undefined)
+
+! Paksa percepat durasi video iklan jika terdeteksi ad-showing
+m.youtube.com,youtube.com##+js(trusted-replace-fetch-response, /youtubei\/v1\/player/, "adPlacements\":\\[", "adPlacements\":[])
